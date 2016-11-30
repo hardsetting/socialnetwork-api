@@ -5,8 +5,17 @@ var User = require('../models/user');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-    query.limit(10).then(function(users) {
+    User.query().limit(10).then(function(users) {
         res.json(users);
+    }).catch(function(err) {
+        res.status(500).json({error: err});
+    });
+});
+
+router.get('/:id', function(req, res, next) {
+    var id = req.params.id;
+    User.query().where('id', id).then(function(users) {
+        res.json(users.length > 0 ? users[0] : null);
     }).catch(function(err) {
         res.status(500).json({error: err});
     });
