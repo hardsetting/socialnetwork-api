@@ -6,7 +6,9 @@ var knex = Knex({
     connection: {
         host: 'localhost',
         port: '5432',
-        database: 'socialnetwork'
+        database: 'socialnetwork',
+        user: 'socialnetwork',
+        password: '765184'
     }
 });
 
