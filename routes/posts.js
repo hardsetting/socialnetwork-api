@@ -17,7 +17,10 @@ router.get('/:id', function(req, res, next) {
 
 // todo require logged user
 router.post('/', authenticate, function(req, res, next) {
-    let data = req.body;
+    let data = {
+        creator_user_id: req.user.id,
+        content: req.body.content
+    };
 
     Post.query().insert(data).then(function(post) {
         res.json(post);

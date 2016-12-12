@@ -41,7 +41,7 @@ passport.use(new LocalStrategy({
 
 // Bearer token configuration for api authentication
 passport.use(new BearerStrategy(function(token, done) {
-    AuthToken.query().where('value', token).eager('user').then(function(auth_tokens) {
+    AuthToken.query().where('token', token).eager('user').then(function(auth_tokens) {
         if (auth_tokens.length == 0) {
             return done(null, false, {message: 'Token not found.'});
         }
