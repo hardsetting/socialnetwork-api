@@ -6,7 +6,6 @@ class Post extends Model {
         return {
             type: 'object',
             required: ['creator_user_id', 'content'],
-
             properties: {
                 id: {type: 'integer'},
                 creator_user_id: {type: 'integer'},
@@ -16,14 +15,16 @@ class Post extends Model {
             }
         };
     }
+
+    $beforeInsert(queryContext) {
+        let now = new Date().toISOString();
+        this.created_at = now;
+        this.updated_at = now;
+    }
+
+    $beforeUpdate(opt, queryContext) {
+        this.updated_at = new Date().toISOString();
+    }
 }
-
-Post.prototype.$beforeInsert = function () {
-    this.updated_at = this.created_at = new Date().toISOString();
-};
-
-Post.prototype.$beforeUpdate = function () {
-    this.updated_at = new Date().toISOString();
-};
 
 module.exports = Post;

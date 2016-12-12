@@ -12,11 +12,23 @@ router.get('/:id', function(req, res, next) {
     });
 });
 
+// todo require logged user
 router.post('/', function(req, res, next) {
     let data = req.body;
 
     Post.query().insert(data).then(function(post) {
         res.json(post);
+    }).catch(function(err) {
+        res.status(500).json({error: err});
+    });
+});
+
+// todo require logged user
+router.delete('/:id', function(req, res, next) {
+    let id = req.params.id;
+
+    Post.query().delete().where('id', id).then(function(post) {
+        res.send();
     }).catch(function(err) {
         res.status(500).json({error: err});
     });
