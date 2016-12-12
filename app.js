@@ -5,12 +5,6 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
-const User = require('./models/user');
-
-require('./db');
-
 let index = require('./routes/index');
 let auth = require('./routes/auth');
 let users = require('./routes/users');
@@ -30,18 +24,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configure passport
-/*app.use(new LocalStrategy(function(username, password, done) {
-    User.query().where('id', 1).then(function(users) {
-        if (users.length > 0) {
-            return done(null, users[0]);
-        } else {
-            return done(null, false, {message: 'Invalid user.'});
-        }
-    }).catch(function(err) {
-        return done(err);
-    });
-}));*/
+require('./conf/db');
+require('./conf/passport')(app);
 
 //app.use('/', index);
 app.use('/api/auth', auth);

@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 
 const Post = require('../models/post');
+
+const authenticate = passport.authenticate('bearer', {session: false});
 
 router.get('/:id', function(req, res, next) {
     let id = req.params.id;
@@ -13,7 +16,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 // todo require logged user
-router.post('/', function(req, res, next) {
+router.post('/', authenticate, function(req, res, next) {
     let data = req.body;
 
     Post.query().insert(data).then(function(post) {

@@ -1,7 +1,7 @@
 const Model = require('objection').Model;
 const Knex = require('knex');
 
-var knex = Knex({
+let knex = Knex({
     client: 'pg',
     connection: {
         host: 'localhost',

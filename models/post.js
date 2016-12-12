@@ -10,8 +10,8 @@ class Post extends Model {
                 id: {type: 'integer'},
                 creator_user_id: {type: 'integer'},
                 content: {type: 'string'},
-                created_at: {type: 'timestamp'},
-                updated_at: {type: 'timestamp'}
+                created_at: {type: 'string'},
+                updated_at: {type: 'string'}
             }
         };
     }
