@@ -3,6 +3,7 @@ const LocalStrategy = require('passport-local');
 const BearerStrategy = require('passport-http-bearer');
 
 const bcrypt = require('bcrypt');
+const moment = require('moment');
 
 const User = require('../models/user');
 const AuthToken = require('../models/auth_token');
@@ -41,17 +42,17 @@ passport.use(new LocalStrategy({
 
 // Bearer token configuration for api authentication
 passport.use(new BearerStrategy(function(token, done) {
-    AuthToken.query().where('token', token).eager('user').then(function(auth_tokens) {
-        if (auth_tokens.length == 0) {
+    AuthToken.query().where('token', token).eager('user').then(function(authTokens) {
+        let authToken = authTokens[0];
+        if (!authToken) {
             return done(null, false, {message: 'Token not found.'});
         }
 
-        let auth_token = auth_tokens[0];
-        if (new Date() > new Date(auth_token.expires_at)) {
+        if (authToken.expires_at < moment().toISOString()) {
             return done(null, false, {message: 'Token expired.'});
         }
 
-        return done(null, auth_token);
+        return done(null, authToken);
     }).catch(function(err) {
         return done(err);
     });

@@ -3,28 +3,48 @@ const router = express.Router();
 const passport = require('passport');
 const uuid = require('uuid4');
 
+const moment = require('moment');
+const _ = require('lodash');
+
 const AuthToken = require('../models/auth_token');
 
-const DURATION_DAY = 24*60*60*1000;
-const TOKEN_DURATION = 3 * DURATION_DAY;
-
-router.post('/', passport.authenticate('local', {session: false}), function(req, res) {
-
-    let now = new Date();
-    let expiresAt = new Date(now.getTime() + TOKEN_DURATION);
-
-    let data = {
+function generateTokens() {
+    return {
         token: uuid(),
         refresh_token: uuid(),
-        user_id: req.user.id,
-        expires_at: expiresAt.toISOString()
+        expires_at: moment().add(30, 'minutes').toISOString()
     };
+}
 
-    AuthToken.query().insert(data).then(function(auth_token) {
-        res.json(auth_token);
+router.post('/', passport.authenticate('local', {session: false}), function(req, res) {
+    let tokens = generateTokens();
+
+    let data = _.clone(tokens);
+    data.user_id = req.user.id;
+
+    AuthToken.query().insert(data).then(function() {
+        res.json(tokens);
     }).catch(function(err) {
         res.status(500).json(err);
     });
+});
+
+router.post('/refresh', function(req, res) {
+    let refreshToken = req.body.refresh_token;
+    let tokens = generateTokens();
+
+    AuthToken.query().patch(tokens)
+        .where({refresh_token: refreshToken})
+        //.andWhere('expires_at', '>', moment().toISOString())
+        .then(function(updated) {
+            if (!updated) {
+                res.status(401).send('Unauthorized');
+            }
+
+            res.json(tokens);
+        }).catch(function(err) {
+            return res.status(500).json(err);
+        });
 });
 
 module.exports = router;
