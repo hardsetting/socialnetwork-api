@@ -1,10 +1,34 @@
 const Model = require('objection').Model;
 
-function User() {
-    Model.apply(this, arguments);
-}
+class User extends Model {
+    static get tableName() { return 'user'; }
+    static get jsonSchema() {
+        return {
+            type: 'object',
+            required: ['username', 'password', 'name', 'surname', 'gender'],
+            properties: {
+                id: {type: 'integer'},
+                username: {type: 'string'},
+                password: {type: 'string'},
+                name: {type: 'string'},
+                surname: {type: 'string'},
+                gender: {type: 'integer'}
+            }
+        };
+    }
 
-Model.extend(User);
-User.tableName = 'user';
+    static get relationMappings() {
+        return {
+            profile_picture: {
+                relation: Model.HasOneRelation,
+                modelClass: __dirname + '/upload',
+                join: {
+                    from: 'user.profile_picture_id',
+                    to: 'upload.id'
+                }
+            }
+        };
+    };
+}
 
 module.exports = User;

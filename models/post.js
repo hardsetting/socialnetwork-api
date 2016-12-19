@@ -16,10 +16,21 @@ class Post extends Model {
         };
     }
 
+    static get relationMappings() {
+        return {
+            creator_user: {
+                relation: Model.HasOneRelation,
+                modelClass: __dirname + '/user',
+                join: {
+                    from: 'post.creator_user_id',
+                    to: 'user.id'
+                }
+            }
+        };
+    };
+
     $beforeInsert(queryContext) {
-        let now = new Date().toISOString();
-        this.created_at = now;
-        this.updated_at = now;
+        this.created_at = new Date().toISOString();
     }
 
     $beforeUpdate(opt, queryContext) {
