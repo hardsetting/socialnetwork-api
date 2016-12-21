@@ -45,10 +45,12 @@ router.get('/search', function(req, res) {
 
 router.get('/:id', function(req, res) {
     let id = req.params.id;
+    let idField = isNaN(id) ? 'username' : 'id';
+
     User
         .query()
         .select('id', 'username', 'name', 'surname', 'gender', 'profile_picture_id')
-        .where('id', id)
+        .where(idField, id)
         .eager('profile_picture')
         .map(function(user) {
             user.$omit('profile_picture_id');
@@ -64,18 +66,25 @@ router.get('/:id', function(req, res) {
 
 router.get('/:id/posts', function(req, res, next) {
     let id = req.params.id;
-    let query = Post.query()
-        .where('creator_user_id', id)
-        .orderBy('created_at', 'desc')
-        .eager('[creator_user, creator_user.profile_picture]')
-        .map(post => {
-            post.$omit('creator_user_id');
-            post.creator_user.$pick('id', 'username', 'name', 'surname', 'profile_picture');
-            post.creator_user.profile_picture.$pick('id', 'url');
-            return post;
-        });
 
-    query.then(posts => {
+    let useUsername = isNaN(id);
+
+    let query = Post.query()
+        .orderBy('created_at', 'desc')
+        .eager('[creator_user, creator_user.profile_picture]');
+
+    if (useUsername) {
+        query.join('user', 'post.creator_user_id', 'user.id').where('user.username', id);
+    } else {
+        query.where('creator_user_id', id);
+    }
+
+    query.map(post => {
+        post.$omit('creator_user_id');
+        post.creator_user.$pick('id', 'username', 'name', 'surname', 'profile_picture');
+        post.creator_user.profile_picture.$pick('id', 'url');
+        return post;
+    }).then(posts => {
         res.json(posts);
     }).catch(err => {
         res.status(500).json({error: err.message});
