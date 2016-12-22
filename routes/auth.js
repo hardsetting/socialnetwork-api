@@ -8,7 +8,7 @@ const _ = require('lodash');
 
 const AuthToken = require('../models/auth_token');
 
-function generateTokens() {
+function generateToken() {
     return {
         token: uuid(),
         refresh_token: uuid(),
@@ -17,13 +17,11 @@ function generateTokens() {
 }
 
 router.post('/', passport.authenticate('local', {session: false}), function(req, res) {
-    let tokens = generateTokens();
+    let token = generateToken();
+    token.user_id = req.user.id;
 
-    let data = _.clone(tokens);
-    data.user_id = req.user.id;
-
-    AuthToken.query().insert(data).then(function() {
-        res.json(tokens);
+    AuthToken.query().insert(token).then(function() {
+        res.json(token);
     }).catch(function(err) {
         res.status(500).json(err);
     });
@@ -31,17 +29,17 @@ router.post('/', passport.authenticate('local', {session: false}), function(req,
 
 router.post('/refresh', function(req, res) {
     let refreshToken = req.body.refresh_token;
-    let tokens = generateTokens();
+    let token = generateToken();
 
-    AuthToken.query().patch(tokens)
+    AuthToken.query().patch(token)
         .where({refresh_token: refreshToken})
         //.andWhere('expires_at', '>', moment().toISOString())
         .then(function(updated) {
             if (!updated) {
-                res.status(401).send('Unauthorized');
+                return res.status(401).send('Unauthorized');
             }
 
-            res.json(tokens);
+            res.json(token);
         }).catch(function(err) {
             return res.status(500).json(err);
         });

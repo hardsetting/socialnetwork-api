@@ -29,7 +29,7 @@ class Upload extends Model {
     }*/
 
     $afterGet(queryContext) {
-        this.url = `http://img.socialnetwork.local/${this.category}/${this.uuid}.${this.extension}`;
+        this.url = `http://socialnetwork.local/static/${this.category}/${this.uuid}.${this.extension}`;
     }
 
     $beforeInsert(queryContext) {
