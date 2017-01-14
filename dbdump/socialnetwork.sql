@@ -119,7 +119,7 @@ CREATE TABLE post (
     creator_user_id integer NOT NULL,
     content character varying NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now()
+    updated_at timestamp with time zone
 );
 
 
@@ -144,6 +144,43 @@ ALTER TABLE post_id_seq OWNER TO socialnetwork;
 --
 
 ALTER SEQUENCE post_id_seq OWNED BY post.id;
+
+
+--
+-- Name: reaction; Type: TABLE; Schema: public; Owner: socialnetwork
+--
+
+CREATE TABLE reaction (
+    id integer NOT NULL,
+    post_id integer NOT NULL,
+    user_id integer NOT NULL,
+    value character varying NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    modified_at timestamp with time zone
+);
+
+
+ALTER TABLE reaction OWNER TO socialnetwork;
+
+--
+-- Name: reaction_id_seq; Type: SEQUENCE; Schema: public; Owner: socialnetwork
+--
+
+CREATE SEQUENCE reaction_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE reaction_id_seq OWNER TO socialnetwork;
+
+--
+-- Name: reaction_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: socialnetwork
+--
+
+ALTER SEQUENCE reaction_id_seq OWNED BY reaction.id;
 
 
 --
@@ -252,6 +289,13 @@ ALTER TABLE ONLY post ALTER COLUMN id SET DEFAULT nextval('post_id_seq'::regclas
 -- Name: id; Type: DEFAULT; Schema: public; Owner: socialnetwork
 --
 
+ALTER TABLE ONLY reaction ALTER COLUMN id SET DEFAULT nextval('reaction_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: socialnetwork
+--
+
 ALTER TABLE ONLY upload ALTER COLUMN id SET DEFAULT nextval('upload_id_seq'::regclass);
 
 
@@ -269,7 +313,37 @@ ALTER TABLE ONLY "user" ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regcl
 COPY auth_token (id, token, refresh_token, user_id, created_at, expires_at) FROM stdin;
 25	8ef30498-935c-46a7-85c3-74f458acd123	a438d159-3502-4835-a127-f6731e631e5c	5859	2016-12-17 21:30:08.399+01	2016-12-17 21:30:08.379+01
 26	81648edc-18fe-4e0c-bf77-2fe284e5113d	e1a201e0-d7ef-43e3-aef8-d0b72fde31c3	5859	2016-12-17 21:32:31.627+01	2016-12-17 21:32:31.61+01
-27	7290b571-e2fb-4876-a049-920b1e9d4589	541730e5-0d77-45ef-9cd2-39292884bf0f	5859	2016-12-17 21:39:29.639+01	2016-12-24 22:55:03.956+01
+27	4d392fdd-dc9d-4837-a91b-6c024ed57dbf	df1e603f-a5c7-4c0e-96c3-7baadad867d6	5859	2016-12-17 21:39:29.639+01	2016-12-22 01:33:51.261+01
+28	ea5f56f6-5b91-4590-acb7-87d28110760b	5c2ab154-aa7c-48bb-8f5f-e8d3fc67f55a	1	2016-12-22 02:12:04.33+01	2016-12-22 02:42:04.324+01
+29	19f14681-6980-486e-bbd7-dd041d6995c4	b7deaa63-3ceb-4108-a855-bf885fae9ca3	1	2016-12-22 02:13:10.089+01	2016-12-22 02:43:10.087+01
+30	fb9e30be-bc5a-4ff5-9d76-0acbf5ffda67	825bbcd4-861a-4514-a024-e76b51884d2e	1	2016-12-22 02:17:38.891+01	2016-12-22 02:47:38.873+01
+31	6bb9eb58-5d85-4a0c-b0ce-c7f375cef1b2	1a958da0-0a22-4fda-bdc7-05635e3cd36e	14	2016-12-22 02:24:16.605+01	2016-12-22 02:54:16.602+01
+32	4799a15e-30a5-4e14-bc96-d14b1eead73d	760ed255-f778-4171-b3a0-12f7daf1404a	1	2016-12-22 02:26:39.438+01	2016-12-22 02:56:39.438+01
+33	b814c5df-e95c-4128-93aa-f670d042171e	bb91229f-f94e-4e15-9e1d-4ac69b715b31	1	2016-12-22 02:38:45.675+01	2016-12-22 03:08:45.673+01
+34	35eb2abf-6f78-4f42-9e79-e3342b4c59e4	b255da82-4675-4fed-a9e7-15e1d70b34a6	14	2016-12-22 02:39:24.125+01	2016-12-22 03:09:24.125+01
+35	c32946b3-9891-4cec-a6ba-3ce49b0fbc1e	195705eb-6d36-404f-93c9-ca13398d068a	1	2016-12-24 02:51:05.064+01	2016-12-24 03:21:05.051+01
+36	55e8f7bd-bd53-46ec-b87a-9b1884282bfe	396d3e1a-c391-4f5d-9007-b080585ea110	1	2016-12-26 19:12:49.44+01	2016-12-26 19:42:49.422+01
+37	a1bea040-9ab0-4a5f-a871-011781a4a2f2	ada27b04-7a84-4394-b646-6ffc685926b5	1	2016-12-26 19:47:57.962+01	2016-12-26 20:17:57.961+01
+38	c5e6b4b7-aafa-45d5-9b4d-4d95d137d28b	040e6d61-80f5-47b9-aebd-f9cbf9038c95	1	2016-12-27 18:17:39.93+01	2016-12-27 18:47:39.915+01
+39	71c0fb31-f507-49c6-b3a6-656ab5d5e0a1	5cd60d12-43a1-4477-8284-be2a2e1daca1	1	2016-12-28 13:17:31.824+01	2016-12-28 13:47:31.805+01
+40	b69f6769-42bc-45f7-b549-273a99dbccb6	eb38ef05-50f1-4901-8d37-9ee071f3a09c	1	2016-12-28 13:55:16.014+01	2016-12-28 14:25:16.007+01
+41	be886150-0a71-4d51-a523-c659d2da0f22	9d7f72ad-0cd9-442f-9ad6-0fdf7dbb829d	1	2016-12-28 14:47:04.236+01	2016-12-28 15:17:04.235+01
+42	ef56d02c-b6cf-4fe9-987b-e1c554bb7120	254b7cbd-33e4-4946-9075-640113354dfd	1	2016-12-28 14:50:16.035+01	2016-12-28 15:20:16.034+01
+43	86a661bf-0426-4925-a07f-1cbbe73b8771	1db72f00-2692-481f-b3cd-8e5a8cf2d577	1	2016-12-28 16:24:44.565+01	2016-12-28 16:54:44.564+01
+44	0dbb5f17-3f5c-4e2c-a198-f8fb4a7d28af	141851f4-0f87-447b-8574-6588ab4d76a8	1	2016-12-28 16:25:22.426+01	2016-12-28 16:55:22.426+01
+45	16e857b1-a5bb-4f8c-ba29-1fb2c79aa372	f2140a20-0fe5-4ebf-9aa0-6ff2cd63539f	1	2016-12-28 16:42:40.785+01	2016-12-28 17:12:40.784+01
+46	9310dc67-6049-45bd-a076-b2a1375f97b3	5c4dda08-3ba4-4e1c-b350-6680a08cc1b9	1	2016-12-28 16:42:55.772+01	2016-12-28 17:12:55.772+01
+47	2389491c-a81a-4bc8-bb63-9919debec8e6	c1c3e446-5d05-41ce-974f-42c5cfb5be4e	14	2016-12-28 16:43:56.11+01	2016-12-28 17:13:56.11+01
+48	a0bfa05f-4b44-4f1a-989c-72cb0986e48e	5ba04de2-e7dc-492f-a52f-d5623aca241d	1	2016-12-28 16:46:47.737+01	2016-12-28 17:16:47.736+01
+49	53ec430f-dd62-49e7-8caf-6aafa46fd12e	6dd9cdbf-ca7f-44c5-a738-82addc058e91	1	2016-12-28 17:44:25.391+01	2016-12-28 18:14:25.388+01
+50	26052dc8-a03e-4c12-9cfc-b46a08c3e3fa	6379be14-2cfa-48fa-8de5-b05d800ce98a	1	2016-12-28 18:22:26.838+01	2016-12-28 18:52:26.837+01
+51	de078b6b-b11f-4b0e-8c9e-4849dbe9632b	a4614c6f-dee2-4752-a7ac-2a5335234a88	1	2016-12-28 18:57:46.831+01	2016-12-28 19:27:46.83+01
+52	82fb011b-ad6b-4809-b91a-d557ce39c4f4	615bcf14-72f8-4ab8-8102-56c3f727d21a	14	2016-12-28 19:19:29.308+01	2016-12-28 19:49:29.308+01
+53	7c4a1d05-d11a-43e1-a408-e4f5a1e1f289	5b7cc9eb-2d41-4cdd-a4f7-e86292e71a51	108	2016-12-28 19:19:38.038+01	2016-12-28 19:49:38.037+01
+54	9d11e3e3-b3b9-416b-81f5-7c32e8d12690	0b8460ae-2e0d-4787-b764-bc0c214ce49e	53	2016-12-28 19:22:43.667+01	2016-12-28 19:52:43.667+01
+55	980aa5d5-5cfe-4185-8252-d9ceebf7bff3	7be516a9-acc7-4f9b-afb4-4d7702362ba2	1	2017-01-14 02:31:04.251+01	2017-01-14 03:01:04.23+01
+56	f2e4a76f-3d98-4921-a94e-0119a01a8a60	5631c6e4-4101-4500-934a-224074f5d1be	1	2017-01-14 03:13:43.035+01	2017-01-14 03:43:43.018+01
+57	946c7362-0c67-4a2f-8e00-e7a40a774ba8	a4100ccc-e1f9-4a2d-92cd-04ff6eeb64f8	1	2017-01-14 03:44:31.421+01	2017-01-14 04:14:31.402+01
 \.
 
 
@@ -277,7 +351,7 @@ COPY auth_token (id, token, refresh_token, user_id, created_at, expires_at) FROM
 -- Name: auth_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: socialnetwork
 --
 
-SELECT pg_catalog.setval('auth_token_id_seq', 27, true);
+SELECT pg_catalog.setval('auth_token_id_seq', 57, true);
 
 
 --
@@ -217972,6 +218046,12 @@ COPY post (id, creator_user_id, content, created_at, updated_at) FROM stdin;
 34	27	ciao	2016-12-19 03:48:30.818+01	2016-12-19 03:48:30.818+01
 35	27	bla	2016-12-19 03:49:11.508+01	2016-12-19 03:49:11.508+01
 36	27	test	2016-12-19 04:13:53.815+01	2016-12-19 04:13:53.818059+01
+37	27	test	2016-12-22 01:03:23.57+01	\N
+38	27	test	2016-12-22 01:03:51.309+01	\N
+39	53	hey guys	2016-12-28 19:20:41.779+01	\N
+40	53	hey guys	2016-12-28 19:21:15.337+01	\N
+41	54	test	2016-12-28 19:22:47.417+01	\N
+42	54	test	2016-12-28 19:22:56.024+01	\N
 \.
 
 
@@ -217979,7 +218059,24 @@ COPY post (id, creator_user_id, content, created_at, updated_at) FROM stdin;
 -- Name: post_id_seq; Type: SEQUENCE SET; Schema: public; Owner: socialnetwork
 --
 
-SELECT pg_catalog.setval('post_id_seq', 36, true);
+SELECT pg_catalog.setval('post_id_seq', 42, true);
+
+
+--
+-- Data for Name: reaction; Type: TABLE DATA; Schema: public; Owner: socialnetwork
+--
+
+COPY reaction (id, post_id, user_id, value, created_at, modified_at) FROM stdin;
+1	3	56	like	2017-01-14 03:43:33.527+01	\N
+3	3	57	like	2017-01-14 03:43:33.527+01	\N
+\.
+
+
+--
+-- Name: reaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: socialnetwork
+--
+
+SELECT pg_catalog.setval('reaction_id_seq', 3, true);
 
 
 --
@@ -230809,6 +230906,22 @@ ALTER TABLE ONLY post
 
 
 --
+-- Name: reaction_pkey; Type: CONSTRAINT; Schema: public; Owner: socialnetwork
+--
+
+ALTER TABLE ONLY reaction
+    ADD CONSTRAINT reaction_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: reaction_post_id_user_id_pk; Type: CONSTRAINT; Schema: public; Owner: socialnetwork
+--
+
+ALTER TABLE ONLY reaction
+    ADD CONSTRAINT reaction_post_id_user_id_pk UNIQUE (post_id, user_id);
+
+
+--
 -- Name: upload_pkey; Type: CONSTRAINT; Schema: public; Owner: socialnetwork
 --
 
@@ -230874,6 +230987,22 @@ ALTER TABLE ONLY friendship
 
 ALTER TABLE ONLY friendship
     ADD CONSTRAINT fk_friendship_user_2 FOREIGN KEY (user_id_2) REFERENCES "user"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: reaction_post_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: socialnetwork
+--
+
+ALTER TABLE ONLY reaction
+    ADD CONSTRAINT reaction_post_id_fk FOREIGN KEY (post_id) REFERENCES post(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: reaction_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: socialnetwork
+--
+
+ALTER TABLE ONLY reaction
+    ADD CONSTRAINT reaction_user_id_fk FOREIGN KEY (user_id) REFERENCES "user"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

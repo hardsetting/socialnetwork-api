@@ -25,7 +25,15 @@ class Post extends Model {
                     from: 'post.creator_user_id',
                     to: 'user.id'
                 }
-            }
+            },
+            reactions: {
+                relation: Model.HasManyRelation,
+                modelClass: __dirname + '/reaction',
+                join: {
+                    from: 'post.id',
+                    to: 'reaction.post_id'
+                }
+            },
         };
     };
 
