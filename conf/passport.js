@@ -52,7 +52,7 @@ passport.use(new BearerStrategy(function(token, done) {
             return done(null, false, {message: 'Token expired.'});
         }
 
-        return done(null, authToken);
+        return done(null, authToken.user);
     }).catch(function(err) {
         return done(err);
     });

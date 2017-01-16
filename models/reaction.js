@@ -1,6 +1,18 @@
 const Model = require('objection').Model;
+const ValidationError = require('objection').ValidationError;
 
 class Reaction extends Model {
+
+    /*static VALUE_LIKE = 1;
+    static VALUE_LAUGH = 2;
+    static VALUE_LOVE = 3;
+
+    static VALUES = [
+        Reaction.VALUE_LIKE,
+        Reaction.VALUE_LAUGH,
+        Reaction.VALUE_LOVE
+    ];*/
+
     static get tableName() { return 'reaction'; }
     static get jsonSchema() {
         return {
@@ -39,6 +51,10 @@ class Reaction extends Model {
     };
 
     $beforeInsert(queryContext) {
+        /*if (Reaction.VALUES.indexOf(this.value) == -1) {
+            throw new ValidationError('Invalid reaction value.');
+        }*/
+
         this.created_at = new Date().toISOString();
     }
 
