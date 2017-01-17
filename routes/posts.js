@@ -25,11 +25,14 @@ router.post('/', authenticate, function(req, res, next) {
         content: req.body.content
     };
 
-    Post.query().insert(data).then(function(post) {
-        res.json(post);
-    }).catch(function(err) {
-        res.status(500).json({error: err});
-    });
+    Post.query()
+        .eager('[reactions, reactions.user, reactions.user.profile_picture]')
+        .insert(data)
+        .then(function(post) {
+            res.json(post);
+        }).catch(function(err) {
+            res.status(500).json({error: err});
+        });
 });
 
 // todo require logged user
