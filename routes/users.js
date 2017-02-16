@@ -94,4 +94,34 @@ router.get('/:id/posts', function(req, res, next) {
     });
 });
 
+router.get('/:id/is-friend', function(req, res, next) {
+    let id = req.params.id;
+
+    let useUsername = isNaN(id);
+
+    let query = Post.query()
+        .orderBy('created_at', 'desc')
+        .eager('[reactions, reactions.user, reactions.user.profile_picture]');
+
+    if (useUsername) {
+        query
+            .select('post.*')
+            .join('user', 'post.creator_user_id', 'user.id')
+            .where('user.username', id);
+    } else {
+        query.where('creator_user_id', id);
+    }
+
+    query.map(post => {
+        post.$omit('creator_user_id');
+        /*post.creator_user.$pick('id', 'username', 'name', 'surname', 'profile_picture');
+         post.creator_user.profile_picture.$pick('id', 'url');*/
+        return post;
+    }).then(posts => {
+        res.json(posts);
+    }).catch(err => {
+        res.status(500).json({error: err.message});
+    });
+});
+
 module.exports = router;

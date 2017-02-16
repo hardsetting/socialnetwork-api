@@ -9,6 +9,7 @@ let index = require('./routes/index');
 let auth = require('./routes/auth');
 let users = require('./routes/users');
 let posts = require('./routes/posts');
+let notifications = require('./routes/notifications');
 
 let app = express();
 
@@ -31,6 +32,7 @@ require('./conf/passport')(app);
 app.use('/api/auth', auth);
 app.use('/api/users', users);
 app.use('/api/posts', posts);
+app.use('/api/notifications', notifications);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

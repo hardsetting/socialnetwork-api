@@ -111,6 +111,43 @@ CREATE TABLE friendship (
 ALTER TABLE friendship OWNER TO socialnetwork;
 
 --
+-- Name: notification; Type: TABLE; Schema: public; Owner: socialnetwork
+--
+
+CREATE TABLE notification (
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    type smallint NOT NULL,
+    data json,
+    created_at timestamp with time zone DEFAULT now(),
+    read_at timestamp with time zone
+);
+
+
+ALTER TABLE notification OWNER TO socialnetwork;
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE; Schema: public; Owner: socialnetwork
+--
+
+CREATE SEQUENCE notification_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE notification_id_seq OWNER TO socialnetwork;
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: socialnetwork
+--
+
+ALTER SEQUENCE notification_id_seq OWNED BY notification.id;
+
+
+--
 -- Name: post; Type: TABLE; Schema: public; Owner: socialnetwork
 --
 
@@ -282,6 +319,13 @@ ALTER TABLE ONLY auth_token ALTER COLUMN id SET DEFAULT nextval('auth_token_id_s
 -- Name: id; Type: DEFAULT; Schema: public; Owner: socialnetwork
 --
 
+ALTER TABLE ONLY notification ALTER COLUMN id SET DEFAULT nextval('notification_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: socialnetwork
+--
+
 ALTER TABLE ONLY post ALTER COLUMN id SET DEFAULT nextval('post_id_seq'::regclass);
 
 
@@ -344,6 +388,33 @@ COPY auth_token (id, token, refresh_token, user_id, created_at, expires_at) FROM
 55	980aa5d5-5cfe-4185-8252-d9ceebf7bff3	7be516a9-acc7-4f9b-afb4-4d7702362ba2	1	2017-01-14 02:31:04.251+01	2017-01-14 03:01:04.23+01
 56	f2e4a76f-3d98-4921-a94e-0119a01a8a60	5631c6e4-4101-4500-934a-224074f5d1be	1	2017-01-14 03:13:43.035+01	2017-01-14 03:43:43.018+01
 57	946c7362-0c67-4a2f-8e00-e7a40a774ba8	a4100ccc-e1f9-4a2d-92cd-04ff6eeb64f8	1	2017-01-14 03:44:31.421+01	2017-01-14 04:14:31.402+01
+58	22b28fae-5d8c-462d-be71-1ba886d307cc	bb69eb79-d4ce-469f-848c-60f4902a54b2	1	2017-01-14 11:40:32.766+01	2017-01-14 12:10:32.748+01
+59	b99298f4-8ea7-4b4c-a7f1-2a6d3e5a4a80	cd33671b-3693-4b5b-b46e-8cd3a3249e02	1	2017-01-14 12:43:25.998+01	2017-01-14 13:13:25.995+01
+60	71bb1b77-7d86-492e-ba17-80b23acb6d1f	d66e8bb2-7aaf-403f-9346-8e20f052b2e2	1	2017-01-14 13:17:13.838+01	2017-01-14 13:47:13.835+01
+61	8ed7a4cb-633e-4b9b-b5af-fc2788d02123	bfecdd26-a237-4539-8682-19d470bb27cd	1	2017-01-14 15:10:33.079+01	2017-01-14 15:40:33.078+01
+62	360d5827-bac9-446a-bfe0-814d601ff8a0	a980c461-1dcc-4380-82b1-b2b1aa2e20f0	1	2017-01-14 15:40:39.426+01	2017-01-14 16:10:39.426+01
+63	fe70c235-85b2-4278-aebe-c9c52ded9b5a	fb18a300-baed-4243-b3ec-f4b866f85d8e	1	2017-01-14 16:11:28.412+01	2017-01-14 16:41:28.411+01
+64	3cad3dbf-e31d-4a2a-8168-5d6081bb7062	2dfdbb09-c2f2-4082-87c9-04f2ef8f7c18	1	2017-01-14 19:34:06.414+01	2017-01-14 20:04:06.413+01
+65	bdfe2f01-7906-4125-913b-bf2791bdf74e	75be16c5-661f-48e4-ac02-91b29219eaa4	1	2017-01-15 14:41:31.67+01	2017-01-15 15:11:31.65+01
+66	161b4016-23d5-467a-ba46-64a7bae35dbd	dc26a0a5-3296-41df-98fe-b38198a5315a	1	2017-01-15 20:35:51.574+01	2017-01-15 21:05:51.574+01
+67	2ddd590d-ac21-4d79-8791-9533bed41339	6baa6ea7-765a-49d5-88b4-0950c6870ad5	1	2017-01-15 21:06:12.863+01	2017-01-15 21:36:12.862+01
+68	c6b1fc8e-b097-4661-bd88-8d670a989434	745fcb0d-0e3b-4a5a-a0e5-4ce1ade319a1	1	2017-01-16 00:13:11.098+01	2017-01-16 00:43:11.082+01
+69	188a6e43-040c-4735-9214-3d21ff39949c	d446977a-9eaf-4abe-a445-6fd36ec7e8d6	1	2017-01-16 00:40:08.32+01	2017-01-16 01:10:08.304+01
+70	0d445a21-7ce5-43e9-9aef-56e727ec9248	40381c95-c703-4513-a2b8-092186b08937	1	2017-01-16 00:41:10.996+01	2017-01-16 01:11:10.971+01
+71	72e12542-aea1-4d12-b57c-24e42713f3d1	c779c7ac-54de-491c-b8e6-a46b26a566d1	1	2017-01-16 01:20:45.143+01	2017-01-16 01:50:45.14+01
+72	b2ddd1b1-2c60-4a0f-bb4e-b5690f27687a	a4305fc6-40e8-4d73-aed0-c6d4370c538f	1	2017-01-16 02:00:36.259+01	2017-01-16 02:30:36.249+01
+73	d0fd8dcf-9061-4e75-8177-9e667a2b8871	953956fb-7afe-498c-a042-5d6eb5a7c15e	56	2017-01-16 02:05:47.13+01	2017-01-16 02:35:47.129+01
+74	19076e01-edc6-4786-8817-bd956582b5bd	4ef05ba8-80f0-4663-bd02-2e4fd9e64b9b	1	2017-01-16 18:58:44.825+01	2017-01-16 19:28:44.809+01
+75	de070a8a-0224-4f8e-97b6-b2a13b241bd0	86e242e0-a53c-4c78-bf20-179791443fc6	1	2017-01-16 19:05:40.279+01	2017-01-16 19:35:40.275+01
+76	174a133e-10ae-4967-af7c-69ea0b0bb2f0	e45920e3-d31a-403f-83ad-cec05afad79b	1	2017-01-16 19:06:16.686+01	2017-01-16 19:08:16.669+01
+77	0eaa8db4-b7c3-4438-a9b9-4e3bac02062f	05bb6b7f-28b7-4f65-82a5-91c86180b276	1	2017-01-16 19:10:08.721+01	2017-01-16 19:21:36.874+01
+78	e7974fb5-ce0c-47e3-b0a5-97cb2642c993	8a9012b5-09e4-4e29-8336-3bd808a737c6	1	2017-01-16 19:52:36.705+01	2017-01-16 19:57:41.989+01
+79	fcc476ac-378b-4d37-a248-a3c8f2c6217f	529621f5-5031-4e30-af45-473f592c06d1	1	2017-01-16 19:56:56.936+01	2017-01-16 20:02:38.417+01
+80	676e530b-a4eb-47a5-9b9e-c68045e5e6bf	1f8da709-d7ba-4880-8a62-9740b027a7fd	1	2017-01-16 20:01:13.894+01	2017-01-16 20:07:10.091+01
+81	0a9cdaff-4c30-440c-828b-7e62649608d3	5312d46b-f736-448a-9d69-f3ac54c07b1b	1	2017-01-16 20:08:23.746+01	2017-01-16 20:19:31.66+01
+82	26a82d20-95dc-49c6-952f-b543a4e8a340	ffe3d04b-683d-4d0b-a6eb-6515df1eed01	1	2017-02-15 02:27:15.272+01	2017-02-15 02:57:15.25+01
+83	1409d92b-ad38-428a-a8fa-d89bcead2c63	5ffd4a1e-157c-490a-927e-5aeab4a50cda	1	2017-02-15 22:24:26.358+01	2017-02-16 01:50:26.058+01
+84	d21190c2-5791-4ebf-ab90-248e9b9e3129	add476a2-5083-4cfe-b8fd-71ac8cb52e83	1	2017-02-16 11:30:55.025+01	2017-02-16 14:26:59.731+01
 \.
 
 
@@ -351,7 +422,7 @@ COPY auth_token (id, token, refresh_token, user_id, created_at, expires_at) FROM
 -- Name: auth_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: socialnetwork
 --
 
-SELECT pg_catalog.setval('auth_token_id_seq', 57, true);
+SELECT pg_catalog.setval('auth_token_id_seq', 84, true);
 
 
 --
@@ -218025,6 +218096,43 @@ COPY friendship (user_id_1, user_id_2) FROM stdin;
 
 
 --
+-- Data for Name: notification; Type: TABLE DATA; Schema: public; Owner: socialnetwork
+--
+
+COPY notification (id, user_id, type, data, created_at, read_at) FROM stdin;
+1	1	1	{"description":"A notification."}	2017-02-16 13:58:59.584+01	2017-02-16 14:02:02.378+01
+2	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:27.993895+01	\N
+3	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:27.993895+01	\N
+4	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:27.993895+01	\N
+5	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:27.993895+01	\N
+6	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:27.993895+01	\N
+7	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:27.993895+01	\N
+8	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:27.993895+01	\N
+9	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:53.137518+01	\N
+10	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:53.137518+01	\N
+11	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:53.137518+01	\N
+12	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:53.137518+01	\N
+13	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:53.137518+01	\N
+14	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:53.137518+01	\N
+15	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:53.137518+01	\N
+16	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:54.17414+01	\N
+17	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:54.17414+01	\N
+18	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:54.17414+01	\N
+19	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:54.17414+01	\N
+20	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:54.17414+01	\N
+21	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:54.17414+01	\N
+22	1	1	{"this is": "a placeholder"}	2017-02-16 14:04:54.17414+01	\N
+\.
+
+
+--
+-- Name: notification_id_seq; Type: SEQUENCE SET; Schema: public; Owner: socialnetwork
+--
+
+SELECT pg_catalog.setval('notification_id_seq', 22, true);
+
+
+--
 -- Data for Name: post; Type: TABLE DATA; Schema: public; Owner: socialnetwork
 --
 
@@ -218052,6 +218160,10 @@ COPY post (id, creator_user_id, content, created_at, updated_at) FROM stdin;
 40	53	hey guys	2016-12-28 19:21:15.337+01	\N
 41	54	test	2016-12-28 19:22:47.417+01	\N
 42	54	test	2016-12-28 19:22:56.024+01	\N
+43	59	She depends on you.	2017-01-14 13:04:57.047+01	\N
+44	65	http://socialnetwork.local/static/profile/0619a287-270a-4136-9006-8f45743bc129.jpg	2017-01-15 20:35:39.377+01	\N
+45	1	This is an actual post.	2017-01-16 00:41:17.342+01	\N
+49	1	oh vez	2017-01-16 20:17:38.361+01	\N
 \.
 
 
@@ -218059,7 +218171,7 @@ COPY post (id, creator_user_id, content, created_at, updated_at) FROM stdin;
 -- Name: post_id_seq; Type: SEQUENCE SET; Schema: public; Owner: socialnetwork
 --
 
-SELECT pg_catalog.setval('post_id_seq', 42, true);
+SELECT pg_catalog.setval('post_id_seq', 49, true);
 
 
 --
@@ -218067,8 +218179,18 @@ SELECT pg_catalog.setval('post_id_seq', 42, true);
 --
 
 COPY reaction (id, post_id, user_id, value, created_at, modified_at) FROM stdin;
-1	3	56	like	2017-01-14 03:43:33.527+01	\N
+21	22	1	laugh	2017-01-16 19:11:27.617+01	\N
 3	3	57	like	2017-01-14 03:43:33.527+01	\N
+4	3	58	like	2017-01-14 03:43:33.527+01	\N
+5	3	61	like	2017-01-14 03:43:33.527+01	\N
+6	3	103	like	2017-01-14 03:43:33.527+01	\N
+7	2	103	like	2017-01-14 03:43:33.527+01	\N
+24	49	1	like	2017-02-15 23:33:51.038+01	\N
+8	1	67	laugh	2017-01-15 21:15:29.406+01	2017-01-15 21:43:01.45+01
+9	1	69	love	2017-01-16 00:40:19.75+01	\N
+18	45	56	love	2017-01-16 02:05:53.546+01	\N
+19	2	56	laugh	2017-01-16 02:05:58.257+01	\N
+14	45	1	laugh	2017-01-16 01:49:20.647+01	2017-01-16 19:07:29.098+01
 \.
 
 
@@ -218076,7 +218198,7 @@ COPY reaction (id, post_id, user_id, value, created_at, modified_at) FROM stdin;
 -- Name: reaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: socialnetwork
 --
 
-SELECT pg_catalog.setval('reaction_id_seq', 3, true);
+SELECT pg_catalog.setval('reaction_id_seq', 24, true);
 
 
 --
@@ -230898,6 +231020,14 @@ ALTER TABLE friendship
 
 
 --
+-- Name: notification_pkey; Type: CONSTRAINT; Schema: public; Owner: socialnetwork
+--
+
+ALTER TABLE ONLY notification
+    ADD CONSTRAINT notification_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: post_pkey; Type: CONSTRAINT; Schema: public; Owner: socialnetwork
 --
 
@@ -230987,6 +231117,14 @@ ALTER TABLE ONLY friendship
 
 ALTER TABLE ONLY friendship
     ADD CONSTRAINT fk_friendship_user_2 FOREIGN KEY (user_id_2) REFERENCES "user"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: notification_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: socialnetwork
+--
+
+ALTER TABLE ONLY notification
+    ADD CONSTRAINT notification_user_id_fk FOREIGN KEY (user_id) REFERENCES "user"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
