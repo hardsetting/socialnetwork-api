@@ -8,7 +8,7 @@ let knex = Knex({
         port: '5432',
         database: 'socialnetwork',
         user: 'socialnetwork',
-        password: '765184'
+        password: 's0c1aln3tw0rk'
     }
 });
 

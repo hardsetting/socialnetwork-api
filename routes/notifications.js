@@ -16,11 +16,10 @@ router.get('/', authenticate, function(req, res) {
     Notification
         .query()
         .where('user_id', req.user.id)
-        .offset(page * perPage)
-        .limit(perPage)
+        .page(page, perPage)
         .orderBy('created_at', 'desc')
-        .then((notifications) => {
-            res.json(notifications);
+        .then((data) => {
+            res.json(data.results);
         }).catch((err) => {
             res.status(500).json({error: err.message});
         });

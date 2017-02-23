@@ -1,0 +1,3 @@
+- Use 201 and Location header for POST
+- use X-Total-Count header for returning total number of items
+- Use Link header for pagination

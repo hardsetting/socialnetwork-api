@@ -2,6 +2,7 @@ const Model = require('objection').Model;
 
 class Friendship extends Model {
     static get tableName() { return 'friendship'; }
+    static get idColumn() { return ['user_id_1', 'user_id_2']; }
     static get jsonSchema() {
         return {
             type: 'object',
@@ -9,6 +10,7 @@ class Friendship extends Model {
             properties: {
                 user_id_1: {type: 'integer'},
                 user_id_2: {type: 'integer'},
+                created_at: {type: 'string'}
             }
         };
     }

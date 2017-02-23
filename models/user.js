@@ -2,6 +2,7 @@ const Model = require('objection').Model;
 
 class User extends Model {
     static get tableName() { return 'user'; }
+    static get idColumn() { return 'id'; }
     static get jsonSchema() {
         return {
             type: 'object',
@@ -25,6 +26,18 @@ class User extends Model {
                 join: {
                     from: 'user.profile_picture_id',
                     to: 'upload.id'
+                }
+            },
+            friends: {
+                relation: Model.ManyToManyRelation,
+                modelClass: __dirname + '/user',
+                join: {
+                    from: 'user.id',
+                    through: {
+                        from: 'friendship.user_id_1',
+                        to: 'friendship.user_id_2'
+                    },
+                    to: 'user.id'
                 }
             }
         };
