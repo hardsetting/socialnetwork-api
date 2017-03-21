@@ -8,6 +8,8 @@ const Reaction = require('../models/reaction');
 const User = require('../models/user');
 const Upload = require('../models/upload');
 
+const wrapAsync = require('../utils').wrapAsync;
+
 const authenticate = passport.authenticate('bearer', {session: false});
 
 router.get('/:id', function(req, res, next) {
@@ -42,83 +44,71 @@ router.post('/', authenticate, function(req, res, next) {
         .catch(next);
 });
 
-router.put('/:id', authenticate, function(req, res, next) {
+router.put('/:id', authenticate, wrapAsync(async function(req, res, next) {
     let id = req.params.id;
     let user_id = req.user.id;
     let content = req.body.content;
 
-    Post.query()
+    let post = await Post.query()
         .where('id', id)
-        .first()
-        .then(post => {
-            if (!post) {
-                return res.status(404).send();
-            } else if (post.creator_user_id != user_id) {
-                return res.status(403).send();
-            }
+        .first();
 
-            return Post.query()
-                .patch({content: content})
-                .where('id', id)
-                .andWhere('creator_user_id', user_id)
-                .then(() => {
-                    res.status(204).send();
-                });
-        })
-        .catch(next);
-});
+    // Check that post exists and is owned by user
+    if (!post) {
+        return res.status(404).send();
+    } else if (post.creator_user_id != user_id) {
+        return res.status(403).send();
+    }
 
-router.delete('/:id', authenticate, function(req, res, next) {
+    await Post.query()
+        .patch({content: content})
+        .where('id', id)
+        .andWhere('creator_user_id', user_id);
+
+    return res.status(204).send();
+}));
+
+router.delete('/:id', authenticate, wrapAsync(async function(req, res, next) {
     let id = req.params.id;
     let user_id = req.user.id;
 
-    // First determine whether the user owns the post
-    Post.query()
+    let post = await Post.query()
         .where('id', id)
-        .first()
-        .then(post => {
-            if (!post) {
-                // Post not found
-                return res.status(404).send();
-            } else if (post.creator_user_id != user_id) {
-                // Post is owned by another user
-                return res.status(403).send();
-            }
+        .first();
 
-            return Post.query()
-                .delete()
-                .where('id', id)
-                .andWhere('creator_user_id', user_id)
-                .then(() => {
-                    res.status(204).send();
-                });
-        })
-        .catch(next);
-});
+    // Return error if not found or owned by other user
+    if (!post) {
+        return res.status(404).send();
+    } else if (post.creator_user_id != user_id) {
+        return res.status(403).send();
+    }
 
-router.put('/:id/react', authenticate, function(req, res, next) {
+    await Post.query()
+        .delete()
+        .where({id: id, creator_user_id: user_id});
+
+    return res.status(204).send();
+}));
+
+router.put('/:id/react', authenticate, wrapAsync(async function(req, res) {
     let data = {
         post_id: Number(req.params.id),
         user_id: req.user.id,
         value: req.body.value
     };
 
-    Reaction.query()
+    let updated = await Reaction.query()
         .patch({value: data.value})
         .where('post_id', data.post_id)
-        .andWhere('user_id', data.user_id)
-        .then(function(updated) {
-            if (updated) {
-                return res.json(data);
-            }
+        .andWhere('user_id', data.user_id);
 
-            // TODO: test if outer catch catches inner error
-            return Reaction.query().insert(data).then(function(reaction) {
-                res.send(reaction);
-            });
-        })
-        .catch(next);
-});
+    if (updated) {
+        return res.json(data);
+    }
+
+    let reaction = await Reaction.query().insert(data);
+    return res.send(reaction);
+}));
 
 router.delete('/:id/react', authenticate, function(req, res, next) {
     let post_id = Number(req.params.id);
@@ -129,7 +119,7 @@ router.delete('/:id/react', authenticate, function(req, res, next) {
         .where('post_id', post_id)
         .andWhere('user_id', user_id)
         .then(function() {
-            return res.send();
+            return res.status(204).send();
         })
         .catch(next);
 });

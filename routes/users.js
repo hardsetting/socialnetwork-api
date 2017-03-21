@@ -8,6 +8,8 @@ const Friendship = require('../models/friendship');
 const Upload = require('../models/upload');
 const Post = require('../models/post');
 
+const wrapAsync = require('../utils').wrapAsync;
+
 const authenticate = passport.authenticate('bearer', {session: false});
 
 /* GET users listing. */
@@ -89,20 +91,22 @@ router.get('/:id/posts', function(req, res, next) {
 router.get('/:id/friends', authenticate, function (req, res, next) {
     let id = req.params.id;
     let limit = req.query.limit || 10;
-    let offset = req.query.limit || 0;
+    let offset = req.query.offset || 0;
 
     // TODO: order friends by interactions with user
 
     User.query()
         .select('user.*')
-        .join('friendship', 'user.id', 'friendship.user_id_1')
-        .where('user_id_2', id)
+        .join('friendship', 'user.id', 'friendship.requested_user_id')
+        .where('friendship.requester_user_id', id)
+        .whereNotNull('friendship.accepted_at')
         .union((query) => {
             query
                 .select('user.*')
                 .from('user')
-                .join('friendship', 'user.id', 'friendship.user_id_2')
-                .where('user_id_1', id);
+                .join('friendship', 'user.id', 'friendship.requester_user_id')
+                .where('friendship.requested_user_id', id)
+                .whereNotNull('friendship.accepted_at');
         })
         .limit(limit)
         .offset(offset)
@@ -115,7 +119,7 @@ router.get('/:id/friends', authenticate, function (req, res, next) {
         .catch(next);
 });
 
-router.get('/:id/friendship', authenticate, async function(req, res) {
+router.get('/:id/friendship', authenticate, wrapAsync(async function(req, res) {
     let id = Number(req.params.id);
     let user_id = Number(req.user.id);
 
@@ -123,20 +127,18 @@ router.get('/:id/friendship', authenticate, async function(req, res) {
     let user = await User.query().findById(id);
 
     if (!user) {
-        //throw new Error();
         return res.status(404).send();
     }
 
-    // Check whether the use is a friend
     let friendship = await Friendship.query()
-        .where('user_id_1', Math.min(id, user_id))
-        .andWhere('user_id_2', Math.max(id, user_id))
+        .where((c) => c.where({requester_user_id: user_id, requested_user_id: id}))
+        .orWhere((c) => c.where({requester_user_id: id, requested_user_id: user_id}))
         .first();
 
-    return res.send(Boolean(friendship));
-});
+    return res.send(friendship);
+}));
 
-router.put('/:id/friendship', authenticate, async function(req, res) {
+router.put('/:id/friendship', authenticate, wrapAsync(async function(req, res) {
     let id = Number(req.params.id);
     let user_id = Number(req.user.id);
 
@@ -147,25 +149,36 @@ router.put('/:id/friendship', authenticate, async function(req, res) {
         return res.status(404).send();
     }
 
-    // Check if the user is already a friend
     let friendship = await Friendship.query()
-            .where('user_id_1', Math.min(id, user_id))
-            .andWhere('user_id_2', Math.max(id, user_id))
-            .first();
+        .where((c) => c.where({requester_user_id: user_id, requested_user_id: id}))
+        .orWhere((c) => c.where({requester_user_id: id, requested_user_id: user_id}))
+        .first();
 
-    // Set as friend if not
+    // Either request or accept friendship
     if (!friendship) {
-        await Friendship.query()
+        friendship = await Friendship.query()
             .insert({
-                user_id_1: Math.min(id, user_id),
-                user_id_2: Math.max(id, user_id),
-            });
+                requester_user_id: user_id,
+                requested_user_id: id
+            })
+            .returning('*');
+
+    } else if (friendship.requested_user_id == user_id) {
+        friendship = await Friendship.query()
+            .patch({accepted_at: new Date().toISOString()})
+            .where({
+                requester_user_id: id,
+                requested_user_id: user_id
+            })
+            .returning('*');
     }
 
-    res.status(204).send();
-});
+    // TODO: manage not changed
 
-router.delete('/:id/friendship', authenticate, async function(req, res) {
+    res.status(201).send(friendship);
+}));
+
+router.delete('/:id/friendship', authenticate, wrapAsync(async function(req, res) {
     let id = Number(req.params.id);
     let user_id = Number(req.user.id);
 
@@ -178,10 +191,10 @@ router.delete('/:id/friendship', authenticate, async function(req, res) {
     // Delete friendship if any
     await Friendship.query()
         .delete()
-        .where('user_id_1', Math.min(id, user_id))
-        .andWhere('user_id_2', Math.max(id, user_id));
+        .where((c) => c.where({requester_user_id: user_id, requested_user_id: id}))
+        .orWhere((c) => c.where({requester_user_id: id, requested_user_id: user_id}));
 
     res.status(204).send();
-});
+}));
 
 module.exports = router;

@@ -2,35 +2,36 @@ const Model = require('objection').Model;
 
 class Friendship extends Model {
     static get tableName() { return 'friendship'; }
-    static get idColumn() { return ['user_id_1', 'user_id_2']; }
+    static get idColumn() { return ['requester_user_id', 'requested_user_id']; }
     static get jsonSchema() {
         return {
             type: 'object',
-            required: ['user_id_1', 'user_id_1'],
+            required: ['requester_user_id', 'requested_user_id'],
             properties: {
-                user_id_1: {type: 'integer'},
-                user_id_2: {type: 'integer'},
-                created_at: {type: 'string'}
+                requester_user_id: {type: 'integer'},
+                requested_user_id: {type: 'integer'},
+                created_at: {type: 'string'},
+                accepted_at: {type: 'string'}
             }
         };
     }
 
     static get relationMappings() {
         return {
-            user_1: {
+            requester_user: {
                 relation: Model.HasOneRelation,
                 modelClass: __dirname + '/user',
                 join: {
                     from: 'user.id',
-                    to: 'friendship.user_id_1'
+                    to: 'friendship.requester_user_id'
                 }
             },
-            user_2: {
+            requested_user: {
                 relation: Model.HasOneRelation,
                 modelClass: __dirname + '/user',
                 join: {
                     from: 'user.id',
-                    to: 'friendship.user_id_2'
+                    to: 'friendship.requested_user_id'
                 }
             }
         };

@@ -6,6 +6,8 @@ const uuid = require('uuid4');
 const moment = require('moment');
 const _ = require('lodash');
 
+const wrapAsync = require('../utils').wrapAsync;
+
 const AuthToken = require('../models/auth_token');
 
 function generateToken() {
@@ -16,33 +18,28 @@ function generateToken() {
     };
 }
 
-router.post('/', passport.authenticate('local', {session: false}), function(req, res) {
+router.post('/login', passport.authenticate('local', {session: false}), function(req, res, next) {
     let token = generateToken();
     token.user_id = req.user.id;
 
     AuthToken.query().insert(token).then(function() {
         res.json(token);
-    }).catch(function(err) {
-        res.status(500).json(err);
-    });
+    }).catch(next);
 });
 
-router.post('/refresh', function(req, res) {
+router.post('/refresh', wrapAsync(async function(req, res) {
     let refreshToken = req.body.refresh_token;
     let token = generateToken();
 
-    AuthToken.query().patch(token)
-        .where({refresh_token: refreshToken})
+    let updated = AuthToken.query().patch(token)
+        .where({refresh_token: refreshToken});
         //.andWhere('expires_at', '>', moment().toISOString())
-        .then(function(updated) {
-            if (!updated) {
-                return res.status(401).send('Unauthorized');
-            }
 
-            res.json(token);
-        }).catch(function(err) {
-            return res.status(500).json(err);
-        });
-});
+    if (!updated) {
+        return res.status(401).send('Unauthorized');
+    }
+
+    return res.send(token);
+}));
 
 module.exports = router;

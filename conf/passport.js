@@ -11,51 +11,57 @@ const AuthToken = require('../models/auth_token');
 // Username/password authentication for Bearer token requests
 passport.use(new LocalStrategy({
     session: false
-}, function(username, password, done) {
+}, async function(username, password, done) {
 
-    User.query().where({username: username}).then(function(users) {
-        // Username match not found
-        if (users.length == 0) {
+    try {
+        let user = await User.query()
+            .where('username', username)
+            .first();
+
+        if (!user) {
             return done(null, false, {message: "User not found."});
         }
 
-        let user = users[0];
-        bcrypt.compare(password, user.password, function(err, valid) {
-            // Error evaluating password
-            if (err) {
-                return done(err);
-            }
+        let valid = bcrypt.compareSync(password, user.password);
 
-            if (valid) {
-                // Password was valid, auth successful
-                return done(null, user);
-            } else {
-                // Password invalid, auth failed
-                return done(null, false, {message: "Authentication failed."});
-            }
-        });
+        if (!valid) {
+            return done(null, false, {message: "Authentication failed."});
+        }
 
-    }).catch(function(err) {
-        return done(err);
-    });
+        done(null, user)
+    } catch(err) {
+        done(err);
+    }
+
 }));
 
 // Bearer token configuration for api authentication
-passport.use(new BearerStrategy(function(token, done) {
-    AuthToken.query().where('token', token).eager('user').then(function(authTokens) {
-        let authToken = authTokens[0];
-        if (!authToken) {
-            return done(null, false, {message: 'Token not found.'});
-        }
-
-        if (authToken.expires_at < moment().toISOString()) {
-            return done(null, false, {message: 'Token expired.'});
-        }
-
-        return done(null, authToken.user);
-    }).catch(function(err) {
+passport.use(new BearerStrategy(async function(token, done) {
+    // Always auth with user 1, for debugging purposes
+    try {
+        let user = await User.query().findById(1);
+        return done(null, user);
+    } catch(err) {
         return done(err);
-    });
+    }
+
+    try {
+        let authToken = await AuthToken.query()
+            .where('token', token)
+            .eager('user')
+            .first();
+
+        if (!authToken) {
+            done(null, false, {message: 'Token not found.'});
+        } else if (authToken.expires_at < moment().toISOString()) {
+            done(null, false, {message: 'Token expired.'});
+        } else {
+            done(null, authToken.user);
+        }
+    } catch(err) {
+        done(err);
+    }
+
 }));
 
 function config(app) {

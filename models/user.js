@@ -28,7 +28,7 @@ class User extends Model {
                     to: 'upload.id'
                 }
             },
-            friends: {
+            /*friends: {
                 relation: Model.ManyToManyRelation,
                 modelClass: __dirname + '/user',
                 join: {
@@ -39,7 +39,7 @@ class User extends Model {
                     },
                     to: 'user.id'
                 }
-            }
+            }*/
         };
     };
 }

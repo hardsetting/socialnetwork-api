@@ -12,4 +12,17 @@ Utils.buildUrl = function(req, uri, params) {
     return url;
 };
 
+Utils.wrapAsync = function(fn) {
+    return (req, res, next) => {
+        try {
+            let result = fn(req, res, next);
+            if (result && result.catch) {
+                result.catch(next);
+            }
+        } catch (e) {
+            next(e);
+        }
+    };
+}
+
 module.exports = Utils;
