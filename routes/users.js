@@ -110,8 +110,9 @@ router.get('/:id/friends', authenticate, function (req, res, next) {
         })
         .limit(limit)
         .offset(offset)
+        .orderBy('name', 'asc', 'surname', 'asc')
         .eager('profile_picture')
-        .pick(User, ['id', 'username', 'name', 'surname', 'profile_picture'])
+        .pick(User, ['id', 'username', 'name', 'surname', 'profile_picture', 'posts_count', 'friends_count'])
         .pick(Upload, ['id', 'url'])
         .then(friends => {
             res.send(friends);

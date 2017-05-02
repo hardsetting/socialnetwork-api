@@ -13,7 +13,9 @@ class User extends Model {
                 password: {type: 'string'},
                 name: {type: 'string'},
                 surname: {type: 'string'},
-                gender: {type: 'integer'}
+                gender: {type: 'integer'},
+                posts_count: {type: 'integer'},
+                friends_count: {type: 'integer'}
             }
         };
     }
