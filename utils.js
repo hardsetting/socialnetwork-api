@@ -23,6 +23,6 @@ Utils.wrapAsync = function(fn) {
             next(e);
         }
     };
-}
+};
 
 module.exports = Utils;

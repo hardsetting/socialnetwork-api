@@ -28,6 +28,7 @@ class User extends Model {
                     to: 'upload.id'
                 }
             },
+
             /*friends: {
                 relation: Model.ManyToManyRelation,
                 modelClass: __dirname + '/user',

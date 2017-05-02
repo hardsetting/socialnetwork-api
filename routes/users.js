@@ -127,13 +127,18 @@ router.get('/:id/friendship', authenticate, wrapAsync(async function(req, res) {
     let user = await User.query().findById(id);
 
     if (!user) {
-        return res.status(404).send();
+        return res.status(404).send('User not found.');
     }
 
     let friendship = await Friendship.query()
         .where((c) => c.where({requester_user_id: user_id, requested_user_id: id}))
         .orWhere((c) => c.where({requester_user_id: id, requested_user_id: user_id}))
         .first();
+
+    if (!friendship) {
+        // TODO: use 204
+        return res.status(404).send('Friendship not found.');
+    }
 
     return res.send(friendship);
 }));
@@ -146,7 +151,7 @@ router.put('/:id/friendship', authenticate, wrapAsync(async function(req, res) {
     let user = await User.query().findById(id);
 
     if (!user) {
-        return res.status(404).send();
+        return res.status(404).send('User not found.');
     }
 
     let friendship = await Friendship.query()
@@ -163,7 +168,7 @@ router.put('/:id/friendship', authenticate, wrapAsync(async function(req, res) {
             })
             .returning('*');
 
-    } else if (friendship.requested_user_id == user_id) {
+    } else if (friendship.requested_user_id === user_id) {
         friendship = await Friendship.query()
             .patch({accepted_at: new Date().toISOString()})
             .where({
@@ -193,6 +198,8 @@ router.delete('/:id/friendship', authenticate, wrapAsync(async function(req, res
         .delete()
         .where((c) => c.where({requester_user_id: user_id, requested_user_id: id}))
         .orWhere((c) => c.where({requester_user_id: id, requested_user_id: user_id}));
+
+    // TODO: differentiate delete from not found
 
     res.status(204).send();
 }));

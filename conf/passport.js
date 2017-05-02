@@ -22,9 +22,8 @@ passport.use(new LocalStrategy({
             return done(null, false, {message: "User not found."});
         }
 
-        let valid = bcrypt.compareSync(password, user.password);
-
-        if (!valid) {
+        let validPassword = bcrypt.compareSync(password, user.password);
+        if (!validPassword) {
             return done(null, false, {message: "Authentication failed."});
         }
 
