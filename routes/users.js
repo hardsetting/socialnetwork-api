@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const utils = require('../utils');
 
+const Model = require('objection').Model;
 const User = require('../models/user');
 const Friendship = require('../models/friendship');
 const Upload = require('../models/upload');
@@ -37,23 +38,28 @@ router.get('/', function(req, res, next) {
         .catch(next);
 });
 
-router.get('/:id', function(req, res, next) {
+router.get('/:id', authenticate, wrapAsync(async (req, res) => {
     let id = req.params.id;
     let idField = isNaN(id) ? 'username' : 'id';
 
-    User
+    let userId = req.user.id;
+
+    let user = await User
         .query()
-        .select('id', 'username', 'name', 'surname', 'profile_picture_id')
+        .select('id', 'username', 'name', 'surname', 'profile_picture_id', 'friends_count', 'posts_count')
         .where(idField, id)
         .eager('profile_picture')
-        .pick(User, ['id', 'username', 'name', 'surname', 'profile_picture'])
+        .pick(User, ['id', 'username', 'name', 'surname', 'profile_picture', 'friends_count', 'posts_count'])
         .pick(Upload, ['id', 'url'])
-        .first()
-        .then(function(user) {
-            res.send(user);
-        })
-        .catch(next);
-});
+        .first();
+
+    user.friendship = await Friendship.query()
+        .where(c => c.where('requested_user_id', user.id).andWhere('requester_user_id', userId))
+        .orWhere(c => c.where('requester_user_id', user.id).andWhere('requested_user_id', userId))
+        .first();
+
+    res.send(user);
+}));
 
 router.get('/:id/posts', function(req, res, next) {
     let id = req.params.id;
@@ -88,14 +94,15 @@ router.get('/:id/posts', function(req, res, next) {
         .catch(next);
 });
 
-router.get('/:id/friends', authenticate, function (req, res, next) {
+//region Friends
+router.get('/:id/friends', authenticate, wrapAsync(async (req, res) => {
     let id = req.params.id;
     let limit = req.query.limit || 10;
     let offset = req.query.offset || 0;
 
     // TODO: order friends by interactions with user
 
-    User.query()
+    let query = User.query()
         .select('user.*')
         .join('friendship', 'user.id', 'friendship.requested_user_id')
         .where('friendship.requester_user_id', id)
@@ -107,18 +114,34 @@ router.get('/:id/friends', authenticate, function (req, res, next) {
                 .join('friendship', 'user.id', 'friendship.requester_user_id')
                 .where('friendship.requested_user_id', id)
                 .whereNotNull('friendship.accepted_at');
-        })
-        .limit(limit)
+        });
+
+    query.limit(limit)
         .offset(offset)
         .orderBy('name', 'asc', 'surname', 'asc')
         .eager('profile_picture')
         .pick(User, ['id', 'username', 'name', 'surname', 'profile_picture', 'posts_count', 'friends_count'])
-        .pick(Upload, ['id', 'url'])
-        .then(friends => {
-            res.send(friends);
-        })
-        .catch(next);
-});
+        .pick(Upload, ['id', 'url']);
+
+    let friends = await query;
+
+    let friendsIds = friends.map(friend => friend.id);
+
+    let friendships = await Friendship.query()
+        .where(c => c.whereIn('requested_user_id', friendsIds).andWhere('requester_user_id', id))
+        .orWhere(c => c.whereIn('requester_user_id', friendsIds).andWhere('requested_user_id', id));
+
+    friends.forEach(friend => {
+        let userId = friend.id;
+        friend.friendship = friendships.find(friendship => {
+            let isRequested = friendship.requested_user_id === userId;
+            let isRequester = friendship.requester_user_id === userId;
+            return isRequested || isRequester;
+        });
+    });
+
+    res.send(friends);
+}));
 
 router.get('/:id/friendship', authenticate, wrapAsync(async function(req, res) {
     let id = Number(req.params.id);
@@ -176,6 +199,7 @@ router.put('/:id/friendship', authenticate, wrapAsync(async function(req, res) {
                 requester_user_id: id,
                 requested_user_id: user_id
             })
+            .first()
             .returning('*');
     }
 
@@ -203,6 +227,41 @@ router.delete('/:id/friendship', authenticate, wrapAsync(async function(req, res
     // TODO: differentiate delete from not found
 
     res.status(204).send();
+}));
+//endregion
+
+router.get('/:id/suggestions', authenticate, wrapAsync(async (req, res) => {
+    let id = req.params.id;
+    let limit = Math.max(req.query.limit || 16, 16);
+    //let offset = req.query.offset || 0;
+
+    let suggestedUserIds = await Model.query()
+        .from('vw_suggestions')
+        .where('user_id', id)
+        .limit(limit)
+        .orderBy('score', 'desc')
+        .pluck('suggested_friend_id');
+
+    let suggestedUsers = await User.query()
+        .whereIn('id', suggestedUserIds)
+        .eager('profile_picture')
+        .pick(User, ['id', 'username', 'name', 'surname', 'profile_picture', 'posts_count', 'friends_count'])
+        .pick(Upload, ['id', 'url']);
+
+    let friendships = await Friendship.query()
+        .where(c => c.whereIn('requested_user_id', suggestedUserIds).andWhere('requester_user_id', id))
+        .orWhere(c => c.whereIn('requester_user_id', suggestedUserIds).andWhere('requested_user_id', id));
+
+    suggestedUsers.forEach(suggestedUser => {
+        let userId = suggestedUser.id;
+        suggestedUser.friendship = friendships.find(friendship => {
+            let isRequested = friendship.requested_user_id === userId;
+            let isRequester = friendship.requester_user_id === userId;
+            return isRequested || isRequester;
+        });
+    });
+
+    res.send(suggestedUsers);
 }));
 
 module.exports = router;

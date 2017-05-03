@@ -18,20 +18,19 @@ function generateToken() {
     };
 }
 
-router.post('/login', passport.authenticate('local', {session: false}), function(req, res, next) {
+router.post('/login', passport.authenticate('local', {session: false}), wrapAsync(async (req, res) => {
     let token = generateToken();
     token.user_id = req.user.id;
 
-    AuthToken.query().insert(token).then(function() {
-        res.json(token);
-    }).catch(next);
-});
+    let authToken = await AuthToken.query().insert(token);
+    return res.json(authToken);
+}));
 
-router.post('/refresh', wrapAsync(async function(req, res) {
+router.post('/refresh', wrapAsync(async (req, res) => {
     let refreshToken = req.body.refresh_token;
     let token = generateToken();
 
-    let updated = AuthToken.query().patch(token)
+    let updated = await AuthToken.query().patch(token)
         .where({refresh_token: refreshToken});
         //.andWhere('expires_at', '>', moment().toISOString())
 

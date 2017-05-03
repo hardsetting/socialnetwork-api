@@ -37,12 +37,12 @@ passport.use(new LocalStrategy({
 // Bearer token configuration for api authentication
 passport.use(new BearerStrategy(async function(token, done) {
     // Always auth with user 1, for debugging purposes
-    try {
+    /*try {
         let user = await User.query().findById(1);
         return done(null, user);
     } catch(err) {
         return done(err);
-    }
+    }*/
 
     try {
         let authToken = await AuthToken.query()
