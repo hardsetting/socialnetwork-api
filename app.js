@@ -5,6 +5,7 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
+let admin = require('./routes/admin');
 let auth = require('./routes/auth');
 let users = require('./routes/users');
 let posts = require('./routes/posts');
@@ -27,6 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 require('./conf/db');
 require('./conf/passport')(app);
 
+app.use('/api/admin', admin);
 app.use('/api/auth', auth);
 app.use('/api/users', users);
 app.use('/api/posts', posts);

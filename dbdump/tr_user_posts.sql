@@ -14,6 +14,14 @@ begin
     where id = new.creator_user_id;
   END IF;
 
+  if tg_op = 'INSERT' THEN
+    insert into notification(user_id, "type", "data")
+      select fr.friend_id, 1,
+        ('{"post_id": ' || new.id::text || ' }')::json
+    from vw_friendship fr
+    where fr.user_id = new.creator_user_id;
+  END IF;
+
   return new;
 end
 $BODY$

@@ -13,3 +13,4 @@ let knex = Knex({
 });
 
 Model.knex(knex);
+Model.rawKnex = knex;

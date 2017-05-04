@@ -26,23 +26,21 @@ router.get('/:id', function(req, res, next) {
         });
 });
 
-router.post('/', authenticate, function(req, res, next) {
+router.post('/', authenticate, wrapAsync(async function(req, res, next) {
     let data = {
         creator_user_id: req.user.id,
         content: req.body.content
     };
 
-    Post.query()
+    let post = await Post.query()
         .eager('reactions.user.profile_picture')
         .pick(User, ['id', 'username', 'name', 'surname', 'profile_picture'])
         .pick(Upload, ['id', 'url'])
-        .insert(data)
-        .then(function(post) {
-            res.set('Location', utils.buildUrl(req, 'api/posts/:id', {id: post.id}));
-            res.status(201).send(post);
-        })
-        .catch(next);
-});
+        .insert(data);
+
+    res.set('Location', utils.buildUrl(req, 'api/posts/:id', {id: post.id}));
+    res.status(201).send(post);
+}));
 
 router.put('/:id', authenticate, wrapAsync(async function(req, res, next) {
     let id = req.params.id;
