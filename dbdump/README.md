@@ -49,3 +49,5 @@ A trigger that keeps updated the posts_count derived field in "user" table,
 as well creating a post notification for each friend of the creator user when inserting. 
 
 #### vw_friendship
+A view that retuns the edges of the social network as if 
+it was a unidirected graph.
