@@ -7,16 +7,16 @@ written for the Distributed Web Applications course.
 The main parts of the application are situated in
 "models", "routes" and "conf" folders.
 
-#### [models](models/README.md)
+#### [models](models)
 Contains the models of the servers side application, each associated with
 a database table. The ORM [Objection.js](https://github.com/Vincit/objection.js/) was used to define the models and access the
 underlying tables.
 
-#### [routes](routes/README.md)
+#### [routes](routes)
 Contains the resources, grouped by category, that define the API.
 The name of each group identifies the first path element.
 
-#### [conf](conf/README.md)
+#### [conf](conf)
 Contains the configuration files for the project, including database and
 authentication configuration through [passport.js](http://passportjs.org).
 
